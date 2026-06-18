@@ -1,0 +1,106 @@
+<html>
+<head>
+<title>MMGP viewer</title>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@4.1.2/dist/vuetify.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/vuetify@4.1.2/dist/vuetify.min.js"></script>
+<script src="mmgp_viewer_src.js"></script>
+<script>
+class Record{
+  constructor(id,name,info,counts){
+    this.id=id;
+    this.name=name;
+    this.info=info;
+    this.counts={};
+    for(let c of counts){
+      this.counts[c[0]]=c[2];
+    }
+  }
+};
+
+</script>
+<style>
+  BODY{
+    overflow-y: scroll;
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="d-flex flex-row flex-wrap">
+    <span class="d-inline-block pa-1" v-for="(esrc,ename,eidx) in emojis" :key="ename"><img :src="esrc" @click="esort(ename)" style="width:20px;height:20px;"/></span>
+  </div>
+
+  <table class="v-table">
+    <tbody>
+      <tr v-for="record in records" :key="record.id"><td>{{record.name}}</td><td>{{record.counts[etarget]}}</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  const { createApp, onMounted, ref } = Vue;
+  const { createVuetify } = Vuetify;
+  const vuetify = createVuetify();
+      
+  const app = createApp({
+    setup() {
+      let ne={};
+      //use newest data
+      for(let r of trec[trec.length-1]["data"]){
+        for(let b of r[3]){
+          ne[b[0]]=b[1];
+        }
+      }
+      const emojis=ne;
+
+      const etarget=":soudane:";
+
+      return{
+        emojis,etarget
+      };
+    },
+    mounted(){
+      this.rrecords=trec[trec.length-1]["data"].map((e,i)=>new Record("emj"+("000"+i).slice(-3),
+        e[1].replace(/^・?(.+?)(（|\().*$/,"$1"),
+        e[2],e[3]));
+      this.esort(this.etarget);
+    },
+    data(){
+      return{
+    //     emojis: {},
+        rrecords:[],
+    //     etarget:"",
+    //   };
+      }
+    },
+    computed:{
+      records(){
+        return this.rrecords.filter(e=>e.counts[this.etarget]>0);
+      }
+    },
+    methods:{
+      esort(ename){
+        this.etarget=ename;
+        //this.records=this.records.toSorted((a,b)=>{
+        this.rrecords.sort((a,b)=>{
+          let acnt=0;
+          let bcnt=0;
+          if(ename in a.counts) acnt=a.counts[ename];
+          if(ename in b.counts) bcnt=b.counts[ename];
+          return bcnt-acnt;
+        });
+      }
+    }
+  });
+  
+  app
+    .use(vuetify)
+    .mount('#app')
+    ;
+
+</script>
+
+</body>
+</html>

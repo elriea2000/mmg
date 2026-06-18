@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>MMGP viewer</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/luxon@3.7.2/build/global/luxon.min.js"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<link rel="https://cdn.jsdelivr.net/npm/vuetify@4.1.2/dist/vuetify.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/vuetify@4.1.2/dist/vuetify.min.js"></script> -->
+<script src="mmgp_viewer_src.js"></script>
+<script>
+let etarget=":soudane:";
+let datasets=[];
+let tls=[];
+let corder=[];
+let icorder={};
+let cdatas={};
+function mounted(){
+  //for(let tl of trec){
+  for(let tli=0;tli<trec.length;++tli){
+  //for(let i=trec.length-1;i>=0;--i){
+    const tl=trec[tli];
+    const _ts=tl["tstamp"];
+    const _y=_ts.slice(0,4);
+    const _m=_ts.slice(4,6);
+    const _d=_ts.slice(6,8);
+    const _h=_ts.slice(8,10);
+    const _M=_ts.slice(10,12);
+    const date=new Date(_y,_m-1,_d,_h,_M);
+    //const date=Math.floor(new Date(_y,_m-1,_d,_h,_M).getTime()/1000);
+    tls.push(date);
+    const data=tl["data"];
+    for(let r of data){
+      const cname=r[1].replace(/^・?(.+?)(（|\().*$/,"$1");
+      let _cscnt=0;
+      //for(let b of r[3]){
+      for(let bi=0;bi<r[3].length;++bi){
+        const b=r[3][bi];
+        if(b[0]==etarget){
+          _cscnt=b[2];
+          break;
+        }
+      }
+      if(cname in cdatas){
+        cdatas[cname].push(_cscnt);
+      }
+      else{
+        icorder[cname]=corder.length;
+        corder.push(cname);
+        if(tli==0)
+          cdatas[cname] = [_cscnt];
+        else
+          cdatas[cname] = (new Array(tli).fill(0)).concat([_cscnt]);
+      }
+    }
+  }
+}
+mounted();
+
+function parseBigIntRadix32(str) {
+  // 小文字に統一し、安全のために前後の空白を削除
+  const cleanedStr = str.trim().toLowerCase();
+  
+  let result = 0n;
+  const radix = 32n;
+
+  for (const char of cleanedStr) {
+    // 各文字を 0〜31 の数値に変換 (a=10, b=11, ... v=31)
+    const digit = parseInt(char, 32);
+    
+    // 32進数として無効な文字が含まれている場合は NaN 相当の処理（またはエラー）
+    if (isNaN(digit)) {
+      throw new SyntaxError(`Invalid character '${char}' for radix 32`);
+    }
+    
+    // 桁をずらして現在の値を足す
+    result = result * radix + BigInt(digit);
+  }
+
+  return result;
+}
+
+// 全てのデータセットを表示する
+function showAllDatasets() {
+  chart.data.datasets.forEach((dataset, i) => {
+    chart.getDatasetMeta(i).hidden = false;
+    dataset.hidden = false;
+  });
+  chart.update();
+}
+
+// 全てのデータセットを非表示にする
+function hideAllDatasets() {
+  chart.data.datasets.forEach((dataset, i) => {
+    chart.getDatasetMeta(i).hidden = true;
+    dataset.hidden = true;
+  });
+  chart.update();
+}
+
+function getHiddenCode(){
+  let bhidden=0n;
+  chart.data.datasets.forEach((dataset, i) => {
+    if(chart.getDatasetMeta(i).hidden){
+      bhidden = bhidden | 1n<<BigInt(i);
+    }
+  });
+  let hcode=bhidden.toString(32);
+  document.getElementById("hcode").value=hcode;
+}
+
+function setHiddenCode(){
+  const hcode=document.getElementById("hcode").value;
+  //const bhidden=parseInt(hcode,32);
+  const bhidden = parseBigIntRadix32(hcode);
+  chart.data.datasets.forEach((dataset, i) => {
+    if((bhidden & 1n<<BigInt(i))!=0){
+      chart.getDatasetMeta(i).hidden=true;
+      dataset.hidden = true;
+    }
+    else{
+      chart.getDatasetMeta(i).hidden=false;
+      dataset.hidden = false;
+    }
+  });
+  chart.update();
+}
+</script>
+</head>
+<body>
+
+<div>
+  <button onclick="showAllDatasets()">show all</button> <button onclick="hideAllDatasets()">hide all</button> <input type="text" id="hcode" onchange="setHiddenCode()"/> <button onclick="getHiddenCode()">get code</button>
+</div>
+
+<div>
+  <canvas id="myChart"></canvas>
+</div>
+
+<script>
+  const ctx = document.getElementById('myChart');
+
+  let chart=new Chart(ctx, {
+    type: 'line',
+    data: {},
+    // data: {
+    //   labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+    //   datasets: [{
+    //     label: '# of Votes',
+    //     data: [12, 19, 3, 5, 2, 3],
+    //     borderWidth: 1
+    //   }]
+    // },
+    options: {
+      scales: {
+        x:{
+          type: 'time',
+          //type: 'linear',
+          time: {
+            unit: 'hour', // 自動選択させず、単位を「時間」に固定
+            displayFormats: {
+              hour: 'MM/dd hh aa' // ツールチップや目盛りの表示形式
+            }
+          },
+        },
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+  datasets=[];
+  for(let i=0;i<corder.length;++i){
+    const cname=corder[i];
+    let _data=[];
+    for(let ci=0;ci<tls.length;++ci){
+      _data.push(
+        {
+          x: tls[ci],
+          y: cdatas[cname][ci]
+        }
+      );
+    }
+    datasets.push(
+      {
+        label: cname,
+        data: _data,
+        fill: false
+      }
+      // {
+      //   label: 'My First Dataset',
+      //   data: [65, 59, 80, 81, 56, 55, 40],
+      //   fill: false,
+      //   borderColor: 'rgb(75, 192, 192)',
+      //   tension: 0.1
+      // }
+    );
+  }
+  
+  chart.data.labels = [];
+  chart.data.datasets = datasets;
+  chart.update();
+</script>
+</body>
+</html>

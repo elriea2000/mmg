@@ -1,0 +1,5 @@
+*.txt
+*.zip
+/snapshots/
+/outputs/
+/utils/emojis_src/
