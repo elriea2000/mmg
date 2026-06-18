@@ -16,5 +16,5 @@ for i,fn in enumerate(fns):
     sout.write("\n")
 sout.write("]\n")
 
-with open("./viewer/mmgp_viewer_src.js","w",encoding="utf8") as fp:
+with open("./docs/mmgp_viewer_src.js","w",encoding="utf8") as fp:
     fp.write(sout.getvalue())
