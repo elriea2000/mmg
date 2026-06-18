@@ -24,13 +24,16 @@ class Record{
 </script>
 <style>
   BODY{
-    overflow-y: scroll;
+    /* overflow-y: scroll; */
   }
 </style>
 </head>
 <body>
 
 <div id="app">
+
+  <div>{{tstamp}}</div>
+
   <div class="d-flex flex-row flex-wrap">
     <span class="d-inline-block pa-1" v-for="(esrc,ename,eidx) in emojis" :key="ename"><img :src="esrc" @click="esort(ename)" style="width:20px;height:20px;"/></span>
   </div>
@@ -40,6 +43,7 @@ class Record{
       <tr v-for="record in records" :key="record.id"><td>{{record.name}}</td><td>{{record.counts[etarget]}}</td></tr>
     </tbody>
   </table>
+
 </div>
 
 <script>
@@ -51,6 +55,8 @@ class Record{
     setup() {
       let ne={};
       //use newest data
+      let _ts = trec[trec.length-1]["tstamp"];
+      const tstamp = _ts.slice(0,4)+"/"+_ts.slice(4,6)+"/"+_ts.slice(6,8)+" "+_ts.slice(8,10)+":"+_ts.slice(10,12);
       for(let r of trec[trec.length-1]["data"]){
         for(let b of r[3]){
           ne[b[0]]=b[1];
@@ -61,7 +67,7 @@ class Record{
       const etarget=":soudane:";
 
       return{
-        emojis,etarget
+        tstamp,emojis,etarget
       };
     },
     mounted(){
