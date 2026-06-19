@@ -23,7 +23,7 @@ else:
 tstamp=re.split("(\.|_)",os.path.split(fn)[-1])[2]
 
 # 無視するレス番一覧（削除されたものとか）
-ignore_id=[0,1,2,26,49,56,67,70,71,72,85]
+ignore_id=[0,1,2,26,49,56,67,70,71,72,85,97,109]
 
 with open(fn,"r",encoding="utf8") as fp:
     bs = BeautifulSoup(fp,"html.parser")
