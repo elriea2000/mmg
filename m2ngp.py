@@ -15,7 +15,7 @@ emojis_mbk=[e for e in emojis if e[1]!=""]
 emojis_mbk_inv={e[1]:e[0] for e in emojis_mbk}
 
 # ターゲットファイル
-# fn="./snapshots/snapshot_202606172215.html"
+# fn="./snapshots/snapshot_202606192220.html"
 if len(sys.argv)>1:
     fn=sys.argv[1]
 else:
@@ -23,7 +23,7 @@ else:
 tstamp=re.split("(\.|_)",os.path.split(fn)[-1])[2]
 
 # 無視するレス番一覧（削除されたものとか）
-ignore_id=[0,1,2,26,49,56,67,70,71,72,85,97,109]
+ignore_id=[0,1,2,26,49,56,67,70,71,72,85,97,109,118]
 
 with open(fn,"r",encoding="utf8") as fp:
     bs = BeautifulSoup(fp,"html.parser")

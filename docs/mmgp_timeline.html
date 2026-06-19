@@ -39,7 +39,8 @@ function mounted(){
     tls.push(date);
     const data=tl["data"];
     for(let r of data){
-      const cname=r[1].replace(/^・?(一撃絶命鉄宝流空手最高指導者|全世界の警察を動かせる唯一の人間リンド・エル・テイラー通称)?(.+?)((（|\().*)?$/,"$2");
+      let cname=r[1].replace(/^・?(一撃絶命鉄宝流空手最高指導者|全世界の警察を動かせる唯一の人間リンド・エル・テイラー通称)?(.+?)((（|\().*)?$/,"$2");
+      if(cname=="底に攪拌装置がついていて自動的に飲み物をまぜまぜしてくれる便利グッズ「SELF STIRRING MUG」") cname="🚮";
       let _cscnt=0;
       //for(let b of r[3]){
       for(let bi=0;bi<r[3].length;++bi){
