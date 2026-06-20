@@ -33,11 +33,17 @@ class BRecord:
         self.name=name
         self.count=count
 class Record:
-    def __init__(self,name="",info="",sr=BRecord(":soudane:", 0), ar=[]):
+    def __init__(self,name="",info="",sr=None, ar=None):
         self.name=name
         self.info=info
-        self.sr=sr
-        self.ar=ar
+        if sr==None:
+            self.sr=BRecord(":soudane:", 0)
+        else:
+            self.sr=sr
+        if ar==None:
+            self.ar=[]
+        else:
+            self.ar=ar
 
 #fn="./outputs/output_202606162329.json"
 fn=glob.glob("./outputs/output_*.json")[-1]
